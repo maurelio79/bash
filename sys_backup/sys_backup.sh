@@ -23,7 +23,6 @@ CONFIG="/etc/sys_backup.conf"
         SOURCE=`cat $CONFIG | grep "Directory to backup" | cut -d: -f2`
         DESTDIR=`cat $CONFIG | grep "Destination folder" | cut -d: -f2`
         DAYS=`cat $CONFIG | grep "Days" | cut -d: -f2`
-		DAYS="+$DAYS"
         LOG=`cat $CONFIG | grep "Log file" | cut -d: -f2`
         # ARCHIVE=`cat $CONFIG | grep "Archive .bak" | cut -d: -f2`
  
