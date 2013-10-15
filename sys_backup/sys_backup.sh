@@ -10,6 +10,14 @@
 # License: GPLv2 http://www.gnu.org/licenses/licenses.en.html
 #
 ####################################################################
+
+#############################################
+# TODO
+# - Check folder if exist
+# - Check correct execution of function
+# - Check id $DAYS is a number
+# - Verify ctime and mtime
+#############################################
  
 # Define configuration file
 CONFIG="/etc/sys_backup.conf"
@@ -26,7 +34,7 @@ CONFIG="/etc/sys_backup.conf"
         LOG=`cat $CONFIG | grep "Log file" | cut -d: -f2`
         # ARCHIVE=`cat $CONFIG | grep "Archive .bak" | cut -d: -f2`
  
-        if [[ ! $SOURCE || ! $DESTDIR || ! $DAYS || ! $LOG ]]; then
+        if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG ]]; then
                 echo "Some element in configuration file are not present."
                 exit 1
         fi
@@ -39,12 +47,17 @@ clean() {
         find $DESTDIR/ -type f -mtime +5 | xargs rm -f -- 2>> "/var/log/$LOG"
 }
  
-# Move all backupped diretctory in a single archive to keep for 3 days
+# Move all backupped diretctory in a single archive to keep for 5 days
 tarbak(){
         ls $DESTDIR/*.tar 2>> "/var/log/$LOG"
         if [ $? -eq 0 ]; then
-        tar cf $DESTDIR/archive`date +%d%m%y`.tar.bz2 $DESTDIR/*.tar 2>> "/var/log/$LOG"
-# Need to fix here: a check for tar
+	        tar cf $DESTDIR/archive`date +%d%m%y`.tar.bz2 $DESTDIR/*.tar 2>> "/var/log/$LOG"
+			if [ $? -gt 0 ]; then
+				echo "Some errors occuring during tar of old backup, see above" >> "/var/log/$LOG"
+				echo "I will not remove old backup" >> "/var/log/$LOG"
+				return 1
+				exit 1
+			fi
         rm -f $DESTDIR/*.tar 2>> "/var/log/$LOG"
         fi
  
@@ -76,6 +89,7 @@ backup(){
         tar cf $DESTDIR/`basename $i`-`date +%H%M%S`.tar $i  2>> "/var/log/$LOG"
                         if [ $? -gt 0 ]; then
                         echo "Error during tar of $i" >> "/var/log/$LOG"
+						return 1
                         fi
  
         done
@@ -91,4 +105,8 @@ clean
 tarbak
  
 backup
+if backup; then
+	echo "All directory correctly backupped"  >> "/var/log/$LOG"
+fi
+
 
