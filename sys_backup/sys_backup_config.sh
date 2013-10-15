@@ -22,8 +22,8 @@
 
 #############################################
 # TODO
-# - Check folder if exist
-# - Check correct execution of function
+# - Check folder if exist -> partial done
+# - Check correct execution of function -> partial done
 # - Check id $DAYS is a number
 # - Verify ctime and mtime
 #############################################
@@ -147,7 +147,7 @@
 
 
 # If all variables are not set, display error
-	if [[ ! $SOURCE || ! $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
+	if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
 		    # echo "Please fill all fields!"
 			zenity --error --title="Config dialog Error" --text="Please fill all fields! They are necessary to correctly run the script."
 		    exit 1

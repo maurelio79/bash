@@ -13,11 +13,17 @@
 
 #############################################
 # TODO
-# - Check folder if exist
-# - Check correct execution of function
+# - Check folder if exist -> partial done
+# - Check correct execution of function -> partial done
 # - Check id $DAYS is a number
 # - Verify ctime and mtime
 #############################################
+
+##########################################
+#
+# Define variables and function
+#
+##########################################
  
 # Define configuration file
 CONFIG="/etc/sys_backup.conf"
@@ -35,7 +41,8 @@ CONFIG="/etc/sys_backup.conf"
         # ARCHIVE=`cat $CONFIG | grep "Archive .bak" | cut -d: -f2`
  
         if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG ]]; then
-                echo "Some element in configuration file are not present."
+                echo "Some element in configuration file are not present or are wrong."
+				echo "Please rerun sys_backup_config.sh"
                 exit 1
         fi
  
@@ -53,34 +60,13 @@ tarbak(){
         if [ $? -eq 0 ]; then
 	        tar cf $DESTDIR/archive`date +%d%m%y`.tar.bz2 $DESTDIR/*.tar 2>> "/var/log/$LOG"
 			if [ $? -gt 0 ]; then
-				echo "Some errors occuring during tar of old backup, see above" >> "/var/log/$LOG"
-				echo "I will not remove old backup" >> "/var/log/$LOG"
+				echo "Some errors occuring during tar of old backup, see above." >> "/var/log/$LOG"
+				echo "I will not remove old backup." >> "/var/log/$LOG"
 				return 1
 				exit 1
 			fi
         rm -f $DESTDIR/*.tar 2>> "/var/log/$LOG"
-        fi
- 
-############################################################
-#       for k in `ls $DESTDIR/*.tar`; do
-#               NEWNAME=$k.bak
-#               mv $k $NEWNAME
-#                       if [ $? -gt 0 ]; then
-#                       echo "Error during renaming of $k" >> $LOG
-#                       fi
-#       done
-#       fi
-#
-#       if [ $ARCHIVE == "yes" ]; then
-#       ls $DESTDIR/*.bak 2>> $LOG
-#               if [ $? -eq 0 ]; then
-#               tar cf $DESTDIR/archive`date +%d%m%y`.tar $DESTDIR/*.bak 2>> $LOG
-#                       if [ $? -gt 0 ]; then
-#                       echo "Error creating archive.tar" >> $LOG
-#                       fi
-#               fi
-####################################################################
- 
+        fi 
 }
  
 # Start backup of directory defined in configuration file
@@ -94,7 +80,13 @@ backup(){
  
         done
 }
- 
+
+##########################################
+#
+# Starting the script
+#
+##########################################
+
 echo "----------------------------------------------------------" >> "/var/log/$LOG"
 echo `date` >> "/var/log/$LOG"
 echo "----------------------------------------------------------" >> "/var/log/$LOG"
@@ -103,16 +95,22 @@ echo "----------------------------------------------------------" >> "/var/log/$
 clean
  
 if ! tarbak; then
-	echo "Abnormal exiting. See error above" >> "/var/log/$LOG"
+	echo "Abnormal exiting. See error above." >> "/var/log/$LOG"
 	exit 1
 fi
  
 
 if backup; then
-	echo "All directory correctly backupped"  >> "/var/log/$LOG"
+	echo "All directory correctly backupped."  >> "/var/log/$LOG"
 else
-	echo "Abnormal exiting. See error above" >> "/var/log/$LOG"
+	echo "Abnormal exiting. See error above." >> "/var/log/$LOG"
 	exit 1
 fi
+
+##########################################
+#
+# End of script
+#
+##########################################
 
 
