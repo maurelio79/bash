@@ -53,10 +53,10 @@
 
 # Write down the configuration file
 	function create_conf(){
-		echo "Directory to backup : $SOURCE" >> $CONFIG
-		echo "Destination folder : $DESTDIR" >> $CONFIG
-		echo "Days : $DAYS" >> $CONFIG
-		echo "Log file : $LOG" >> $CONFIG
+		echo "Directory to backup :$SOURCE" >> $CONFIG
+		echo "Destination folder :$DESTDIR" >> $CONFIG
+		echo "Days :$DAYS" >> $CONFIG
+		echo "Log file :$LOG" >> $CONFIG
 	}
 
 

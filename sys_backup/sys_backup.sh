@@ -12,7 +12,7 @@
 ####################################################################
  
 # Define configuration file
-CONFIG=/etc/sys_backup.conf
+CONFIG="/etc/sys_backup.conf"
  
         if [ ! -f $CONFIG ]; then
                 echo "Configuration file not found"
@@ -23,6 +23,7 @@ CONFIG=/etc/sys_backup.conf
         SOURCE=`cat $CONFIG | grep "Directory to backup" | cut -d: -f2`
         DESTDIR=`cat $CONFIG | grep "Destination folder" | cut -d: -f2`
         DAYS=`cat $CONFIG | grep "Days" | cut -d: -f2`
+		DAYS="+$DAYS"
         LOG=`cat $CONFIG | grep "Log file" | cut -d: -f2`
         # ARCHIVE=`cat $CONFIG | grep "Archive .bak" | cut -d: -f2`
  
@@ -36,16 +37,16 @@ declare -a dirtobak=($SOURCE);
  
 # Remove backup older than 3 days
 clean() {
-        find $DESTDIR/ -type f -mtime +$DAYS | xargs rm -f -- 2>> $LOG
+        find $DESTDIR/ -type f -mtime +5 | xargs rm -f -- 2>> "/var/log/$LOG"
 }
  
 # Move all backupped diretctory in a single archive to keep for 3 days
 tarbak(){
-        ls $DESTDIR/*.tar 2>> $LOG
+        ls $DESTDIR/*.tar 2>> "/var/log/$LOG"
         if [ $? -eq 0 ]; then
-        tar cf $DESTDIR/archive`date +%d%m%y`.tar.bz2 $DESTDIR/*.tar 2>> $LOG
+        tar cf $DESTDIR/archive`date +%d%m%y`.tar.bz2 $DESTDIR/*.tar 2>> "/var/log/$LOG"
 # Need to fix here: a check for tar
-        rm -f $DESTDIR/*.tar 2>> $LOG
+        rm -f $DESTDIR/*.tar 2>> "/var/log/$LOG"
         fi
  
 ############################################################
@@ -73,17 +74,17 @@ tarbak(){
 # Start backup of directory defined in configuration file
 backup(){
         for i in ${dirtobak[@]}; do
-        tar cf $DESTDIR/`basename $i`-`date +%H%M%S`.tar $i  2>> $LOG
+        tar cf $DESTDIR/`basename $i`-`date +%H%M%S`.tar $i  2>> "/var/log/$LOG"
                         if [ $? -gt 0 ]; then
-                        echo "Error during tar of $i" >> $LOG
+                        echo "Error during tar of $i" >> "/var/log/$LOG"
                         fi
  
         done
 }
  
-echo "----------------------------------------------------------" >> $LOG
-echo `date` >> $LOG
-echo "----------------------------------------------------------" >> $LOG
+echo "----------------------------------------------------------" >> "/var/log/$LOG"
+echo `date` >> "/var/log/$LOG"
+echo "----------------------------------------------------------" >> "/var/log/$LOG"
  
 # Launch all function
 clean
@@ -91,3 +92,4 @@ clean
 tarbak
  
 backup
+
