@@ -42,7 +42,7 @@ CONFIG="/etc/sys_backup.conf"
 # Declare array with directory to backup
 declare -a dirtobak=($SOURCE);
  
-# Remove backup older than 3 days
+# Remove backup older than 5 days
 clean() {
         find $DESTDIR/ -type f -mtime +5 | xargs rm -f -- 2>> "/var/log/$LOG"
 }
@@ -102,11 +102,17 @@ echo "----------------------------------------------------------" >> "/var/log/$
 # Launch all function
 clean
  
-tarbak
+if ! tarbak; then
+	echo "Abnormal exiting. See error above" >> "/var/log/$LOG"
+	exit 1
+fi
  
-backup
+
 if backup; then
 	echo "All directory correctly backupped"  >> "/var/log/$LOG"
+else
+	echo "Abnormal exiting. See error above" >> "/var/log/$LOG"
+	exit 1
 fi
 
 
