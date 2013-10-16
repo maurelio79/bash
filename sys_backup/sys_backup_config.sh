@@ -38,12 +38,45 @@
 	CONFIG="/etc/sys_backup.conf"
 	FOLDER_LOG="/var/log"
 
+# Verify if user is root, if not he can not configure script.
+	function check_user(){
+		user=`whoami`
+		if [ $user != "root" ]; then
+			 zenity --error --title="You are not root" --text="You need to be root in order to configure sys_backup script"
+			exit 1
+		fi
+	}
+
+# Display zenity menu
+	function show_zenity_menu(){
+			PARAMETERS=`zenity --title="System Backup Configurator" --forms --text="\tAll files/folders need to be in absolute path format and without / at the end.\n\tSource folder can be more than 1 but they need to be sperated by space.\n\tFor log file just write the name you want, it will be create in /var/log/.\n\n" --width="480" --add-entry="Source folders" --add-entry="Destination folder" --add-entry="Days to keep old backup" --add-entry="Log File"  --separator=:`
+	if [ $? -eq 0 ]; then
+		check_zenity_menu
+	else
+		echo "Exiting"
+		exit 1
+	fi
+	}
+
+# Check if configuration file will create correctly
+	function check_zenity_menu(){
+		SOURCE=`echo $PARAMETERS | cut -d: -f1 `
+		DESTDIR=`echo $PARAMETERS | cut  -d: -f2`
+		DAYS=`echo $PARAMETERS | cut  -d: -f3`
+		LOG=`echo $PARAMETERS | cut  -d: -f4`
+
+# If all variables are not set, display error
+	if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
+			zenity --error --title="Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
+			show_zenity_menu
+	fi
+	}
+
 # If config file already exist, we delete it.
 	function del_files(){
 		if [ -f $CONFIG ]; then
 			rm -f $CONFIG
 		fi
-
 
 # If log file already exist, we delete it.
 		if [ -f $FOLDER_LOG/$LOG ]; then
@@ -71,20 +104,18 @@
 	}
 
 
+
 ##########################################
 #
 # Starting the script
 #
 ##########################################
 
+
 # Check if we are in a window system or not; if not execute the text version
 	if [ ! $DISPLAY ]; then
 # Verify if user is root, if not he can not configure script.
-		user=`whoami`
-		if [ $user != "root" ]; then
-			echo "You need to be root in order to configure sys_backup script"
-			exit 1
-		fi
+		check_user
 
 		echo "Enter source folders to backup separeted by space and press [enter]:"
 		read SOURCE
@@ -114,53 +145,44 @@
 		read LOG
 			while [ ! $LOG ]
 			do
-				echo "Enter position and log file name and press [enter]:"
+				echo "Enter log file name and press [enter]:"
 				read LOG
 			done
 
 		del_files
 
-		create_conf
-
-		write_log
-
-		exit 0
+		if create_conf; then
+			write_log
+			echo "Configuration file correctly created as $CONFIG\nNow you can run sys_backup script located in /usr/local/bin"	
+			exit 0
+		else
+			echo "Errors occur during creation of configuration file."
+			exit 1
+		fi
 	fi
 
 # If we are here it means that we are in window X system, so zenity version of script will be used.
+
 # Verify if user is root, if not he can not configure script.
-		user=`whoami`
-		if [ $user != "root" ]; then
-			 zenity --error --title="You are not root" --text="You need to be root in order to configure sys_backup script"
-			exit 1
-		fi
+	check_user
 
 # Display zenity window
-	PARAMETERS=`zenity --title="System Backup Configurator" --forms --text="All files/folders need to be in absolute path format and without / at the end;\n source folder can be more than 1 but they need to be sperated by space.\n" --add-entry="Source folders" --add-entry="Destination folder" --add-entry="Days to keep old backup" --add-entry="Log File"  --separator=:`
+	show_zenity_menu
 
-
-# Extract variables needed in config file
-	SOURCE=`echo $PARAMETERS | cut -d: -f1 `
-	DESTDIR=`echo $PARAMETERS | cut  -d: -f2`
-	DAYS=`echo $PARAMETERS | cut  -d: -f3`
-	LOG=`echo $PARAMETERS | cut  -d: -f4`
-
-
-# If all variables are not set, display error
-	if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
-		    # echo "Please fill all fields!"
-			zenity --error --title="Config dialog Error" --text="Please fill all fields! They are necessary to correctly run the script."
-		    exit 1
-	fi
-
+# Delete old files
 	del_files
 
-	create_conf
+# Create configuration file
+	if create_conf; then
+# Write into log
+		write_log
+		zenity --info --title="Well Done!" --text="Configuration file correctly created as $CONFIG\nNow you can run sys_backup script located in /usr/local/bin"
+		exit 0
+	else
+		zenity --error --title="Config dialog Error" --text="Errors occur during creation of configuration file."
+		exit 1
+	fi	
 
-	write_log
-
-
-	zenity --info --title="Well Done!" --text="Configuration file correctly created as $CONFIG\nNow you can run sys_backup script located in /usr/local/bin"
 
 ##########################################
 #
