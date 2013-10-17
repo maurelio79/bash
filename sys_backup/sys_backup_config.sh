@@ -42,8 +42,17 @@
 	function check_user(){
 		user=`whoami`
 		if [ $user != "root" ]; then
-			 zenity --error --title="You are not root" --text="You need to be root in order to configure sys_backup script"
+			 zenity --error --title="You are not root!" --text="You need to be root in order to configure sys_backup script"
 			exit 1
+		fi
+	}
+
+# A simple function to get error and display/write in log error
+	function get_rc(){
+		if [ $? -gt 0 ]; then
+			message=$1
+			#echo -ne $message >> $FOLDER_LOG/$LOG
+			zenity --error --title="Sys Backup Config dialog Error" --text="$message"
 		fi
 	}
 
@@ -67,15 +76,15 @@
 
 # If all variables are not set, display error
 	if [[ ! $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
-			zenity --error --title="Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
+			zenity --error --title="Sys Backup Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
 			show_zenity_menu
 	fi
-	
+# I need this to verify that every directory in source filed is a real directory!	
 	declare -a SOURCE=($SOURCES);
 	
 	for i in ${SOURCE[@]}; do
 		if [ ! -d $i ]; then
-			zenity --error --title="Config dialog Error" --text="$i is not a directory, please verify."
+			zenity --error --title="Sys Backup Config dialog Error" --text="$i is not a directory, please verify."
 			show_zenity_menu
 			break
 		fi	
@@ -96,10 +105,22 @@
 
 # Write down the configuration file
 	function create_conf(){
-		echo "Directory to backup :$SOURCES" >> $CONFIG
-		echo "Destination folder :$DESTDIR" >> $CONFIG
-		echo "Days :$DAYS" >> $CONFIG
-		echo "Log file :$LOG" >> $CONFIG
+		eco "Directory to backup :$SOURCES" >> $CONFIG 2>> $FOLDER_LOG/$LOG
+		if get_rc "Error during writing $SOURCES in configuration file"; then
+			return 1
+		fi
+		echo "Destination folder :$DESTDIR" >> $CONFIG 2>> $FOLDER_LOG/$LOG
+		if get_rc "Error during writing $DESTDIR in configuration file"; then
+			return 1
+		fi
+		echo "Days :$DAYS" >> $CONFIG 2>> $FOLDER_LOG/$LOG
+		if get_rc "Error during writing $DAYS in configuration file"; then
+			return 1
+		fi
+		echo "Log file :$LOG" >> $CONFIG 2>> $FOLDER_LOG/$LOG
+		if get_rc "Error during writing $LOG in configuration file"; then
+			return 1
+		fi
 	}
 
 
