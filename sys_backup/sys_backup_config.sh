@@ -22,8 +22,6 @@
 
 #############################################
 # TODO
-# - Check folder if exist -> partial done
-# - Check correct execution of function -> partial done
 # - Check id $DAYS is a number
 # - Verify ctime and mtime
 #############################################
@@ -47,11 +45,10 @@
 		fi
 	}
 
-# A simple function to get error and display/write in log error
+# A simple function to get error and display/write in log
 	function get_rc(){
 		if [ $? -gt 0 ]; then
 			message=$1
-			#echo -ne $message >> $FOLDER_LOG/$LOG
 			zenity --error --title="Sys Backup Config dialog Error" --text="$message"
 		fi
 	}
@@ -75,7 +72,7 @@
 		LOG=`echo $PARAMETERS | cut  -d: -f4`
 
 # If all variables are not set, display error
-	if [[ ! $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
+	if [[ ! $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG ]]; then
 			zenity --error --title="Sys Backup Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
 			show_zenity_menu
 	fi
@@ -105,7 +102,7 @@
 
 # Write down the configuration file
 	function create_conf(){
-		eco "Directory to backup :$SOURCES" >> $CONFIG 2>> $FOLDER_LOG/$LOG
+		echo "Directory to backup :$SOURCES" >> $CONFIG 2>> $FOLDER_LOG/$LOG
 		if get_rc "Error during writing $SOURCES in configuration file"; then
 			return 1
 		fi
@@ -135,62 +132,11 @@
 	}
 
 
-
 ##########################################
 #
 # Starting the script
 #
 ##########################################
-
-
-# Check if we are in a window system or not; if not execute the text version
-	if [ ! $DISPLAY ]; then
-# Verify if user is root, if not he can not configure script.
-		check_user
-
-		echo "Enter source folders to backup separeted by space and press [enter]:"
-		read SOURCE
-			while [[ ! $SOURCE || ! -d $SOURCE ]]
-			do
-				echo "Error! Is this a real folder? Enter source folders to backup separeted by space and press [enter]:"
-				read SOURCE
-			done
-
-		echo "Enter destination folder of backup and press [enter]:"
-		read DESTDIR
-			while [[ ! $DESTDIR || ! -d $DEST ]]
-			do
-				echo "Error! Is this a real folder? Enter destination folder of backup and press [enter]:"
-				read DESTDIR
-			done
-
-		echo "Enter number of days to keep backup and press [enter]:"
-		read DAYS
-			while [ ! $DAYS ]
-			do
-				echo "Enter number of days to keep backup and press [enter]:"
-				read DAYS
-			done
-
-		echo "Enter log file name (it will create in /var/log/) and press [enter]:"
-		read LOG
-			while [ ! $LOG ]
-			do
-				echo "Enter log file name and press [enter]:"
-				read LOG
-			done
-
-		del_files
-
-		if create_conf; then
-			write_log
-			echo "Configuration file correctly created as $CONFIG\nNow you can run sys_backup script located in /usr/local/bin"	
-			exit 0
-		else
-			echo "Errors occur during creation of configuration file."
-			exit 1
-		fi
-	fi
 
 # If we are here it means that we are in window X system, so zenity version of script will be used.
 
