@@ -66,7 +66,7 @@
 		LOG=`echo $PARAMETERS | cut  -d: -f4`
 
 # If all variables are not set, display error
-	if [[ ! -d $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
+	if [[ ! $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
 			zenity --error --title="Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
 			show_zenity_menu
 	fi
@@ -75,8 +75,9 @@
 	
 	for i in ${SOURCE[@]}; do
 		if [ ! -d $i ]; then
-			zenity --error --title="Config dialog Error" --text= "$i is not a directory, please verify"
+			zenity --error --title="Config dialog Error" --text="$i is not a directory, please verify."
 			show_zenity_menu
+			break
 		fi	
 	done
 	}
@@ -95,7 +96,7 @@
 
 # Write down the configuration file
 	function create_conf(){
-		echo "Directory to backup :$SOURCE" >> $CONFIG
+		echo "Directory to backup :$SOURCES" >> $CONFIG
 		echo "Destination folder :$DESTDIR" >> $CONFIG
 		echo "Days :$DAYS" >> $CONFIG
 		echo "Log file :$LOG" >> $CONFIG
