@@ -9,8 +9,11 @@ If you want put this script under crontab, just modify /etc/crontab as you prefe
 <pre>
 52 6    * * *   root    /usr/local/bin/sys_backup.sh
 </pre>
-in this way every day at 06:52 folders defined in configuration file will be backupped.<br />
-<b>sys_backup.conf file example</b>
+in this way every day at 06:52 folders defined in configuration file will be backupped.<br /><br />
+<b>sys_backup.conf file example</b><br />
+If you want you can just create manually sys_backup.conf and put it in /etc/.<br />
+<b>Attention!</b><br />
+It must to be in the same format of the example below!
 <pre>
 Directory to backup :/etc /var/log
 Destination folder :/home/maurelio/Pubblici
