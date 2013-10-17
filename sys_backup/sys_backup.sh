@@ -40,7 +40,7 @@ CONFIG="/etc/sys_backup.conf"
         LOG=`cat $CONFIG | grep "Log file" | cut -d: -f2`
         # ARCHIVE=`cat $CONFIG | grep "Archive .bak" | cut -d: -f2`
  
-        if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG ]]; then
+        if [[ ! $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG ]]; then
                 echo "Some element in configuration file are not present or are wrong."
 				echo "Please rerun sys_backup_config.sh"
                 exit 1
