@@ -50,6 +50,8 @@
 		if [ $? -gt 0 ]; then
 			message=$1
 			zenity --error --title="Sys Backup Config dialog Error" --text="$message"
+		else
+			return 1
 		fi
 	}
 
