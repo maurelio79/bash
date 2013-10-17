@@ -60,16 +60,25 @@
 
 # Check if configuration file will create correctly
 	function check_zenity_menu(){
-		SOURCE=`echo $PARAMETERS | cut -d: -f1 `
+		SOURCES=`echo $PARAMETERS | cut -d: -f1 `
 		DESTDIR=`echo $PARAMETERS | cut  -d: -f2`
 		DAYS=`echo $PARAMETERS | cut  -d: -f3`
 		LOG=`echo $PARAMETERS | cut  -d: -f4`
 
 # If all variables are not set, display error
-	if [[ ! -d $SOURCE || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
+	if [[ ! -d $SOURCES || ! -d $DESTDIR || ! $DAYS || ! $LOG || ! $CONFIG ]]; then
 			zenity --error --title="Config dialog Error" --text="Please fill correctly all fields! They are necessary to correctly run the script."
 			show_zenity_menu
 	fi
+	
+	declare -a SOURCE=($SOURCE);
+	
+	for i in ${SOURCE[@]}; do
+		if [ ! -d $i ]; then
+			zenity --error --title="Config dialog Error" --text= "$i is not a directory, please verify"
+			show_zenity_menu
+		fi	
+	done
 	}
 
 # If config file already exist, we delete it.
