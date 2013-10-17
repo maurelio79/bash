@@ -49,7 +49,7 @@
 
 # Display zenity menu
 	function show_zenity_menu(){
-			PARAMETERS=`zenity --title="System Backup Configurator" --forms --text="\tAll files/folders need to be in absolute path format and without / at the end.\n\tSource folder can be more than 1 but they need to be sperated by space.\n\tFor log file just write the name you want, it will be create in /var/log/.\n\n" --width="480" --add-entry="Source folders" --add-entry="Destination folder" --add-entry="Days to keep old backup" --add-entry="Log File"  --separator=:`
+		PARAMETERS=`zenity --title="System Backup Configurator" --forms --text="\tAll files/folders need to be in absolute path format and without / at the end.\n\tSource folder can be more than 1 but they need to be sperated by space.\n\tFor log file just write the name you want, it will be create in /var/log/.\n\n" --width="480" --add-entry="Source folders" --add-entry="Destination folder" --add-entry="Days to keep old backup" --add-entry="Log File"  --separator=:`
 	if [ $? -eq 0 ]; then
 		check_zenity_menu
 	else
