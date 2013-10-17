@@ -71,7 +71,7 @@
 			show_zenity_menu
 	fi
 	
-	declare -a SOURCE=($SOURCE);
+	declare -a SOURCE=($SOURCES);
 	
 	for i in ${SOURCE[@]}; do
 		if [ ! -d $i ]; then
