@@ -1,0 +1,56 @@
+#!/bin/bash
+
+AUTH="/va/log/auth.log"
+BOOT="/var/log/boot.log"
+SYSLOG="/var/log/syslog"
+XORG="/var/log/Xorg.0.log"
+
+function show_dialog(){
+	LOG=`zenity --title="Log Viewer" --text="Choose log to view" --height="250" --list --radiolist --column="Select" --column="Log" \
+	FALSE Auth.log \
+	FALSE Boot.log \
+	FALSE Syslog \
+	FALSE Xorg.0.log \
+	`
+	if [ $? -eq 0 ]; then
+		select_log
+	fi
+}
+
+function check_file(){
+	FILE=$1
+	if [ ! -f $FILE ]; then
+		zenity --error --title="Log Viewer Error" --text="File $FILE not found"
+		show_dialog
+		exit 1
+	fi
+}
+
+function select_log(){
+	case $LOG in
+		Auth.log)
+			check_file $AUTH
+			tail -250 "/var/log/auth.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+		;;
+		Boot.log)
+			check_file $BOOT
+			tail -250 "/var/log/boot.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+		;;
+		Syslog)
+			check_file $SYSLOG
+			tail -250 "/var/log/syslog" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+		;;
+		Xorg.0.log)
+			check_file $XORG
+			tail -250 "/var/log/Xorg.0.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+		;;
+		*)
+			zenity --notification --text="Selection error!"
+			show_dialog
+		;;
+	esac
+}
+
+show_dialog
+
+
