@@ -1,5 +1,20 @@
 #!/bin/bash
 
+####################################################################
+#
+# Simple nautilus_script to quickly access system log.
+#
+# To run this script you need:
+# - tail
+# - zenity
+#
+# Author: Mauro Lomartire
+# Script Name: Log_Viewer
+# Script Version: 1.0 BETA
+# License: GPLv3 http://www.gnu.org/licenses/licenses.en.html
+#
+####################################################################
+
 AUTH="/va/log/auth.log"
 BOOT="/var/log/boot.log"
 SYSLOG="/var/log/syslog"
