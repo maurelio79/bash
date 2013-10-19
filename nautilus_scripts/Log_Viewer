@@ -15,7 +15,7 @@
 #
 ####################################################################
 
-AUTH="/va/log/auth.log"
+AUTH="/var/log/auth.log"
 BOOT="/var/log/boot.log"
 SYSLOG="/var/log/syslog"
 XORG="/var/log/Xorg.0.log"
