@@ -1,24 +1,14 @@
 #!/bin/bash
 
-####################################################################
-#
-# Simple nautilus_script to quickly access system log.
-#
-# To run this script you need:
-# - tail
-# - zenity
-#
-# Author: Mauro Lomartire
-# Script Name: Log_Viewer
-# Script Version: 1.0 BETA
-# License: GPLv3 http://www.gnu.org/licenses/licenses.en.html
-#
-####################################################################
-
-AUTH="/var/log/auth.log"
+AUTH="/va/log/auth.log"
 BOOT="/var/log/boot.log"
 SYSLOG="/var/log/syslog"
 XORG="/var/log/Xorg.0.log"
+BACKUP="/var/log/sys_backup.log"
+
+# Modify this if window is too big for you screen
+WIDTH="1280"
+HEIGHT="1024"
 
 function show_dialog(){
 	LOG=`zenity --title="Log Viewer" --text="Choose log to view" --height="250" --list --radiolist --column="Select" --column="Log" \
@@ -26,6 +16,7 @@ function show_dialog(){
 	FALSE Boot.log \
 	FALSE Syslog \
 	FALSE Xorg.0.log \
+	FALSE Sys_backup.log \
 	`
 	if [ $? -eq 0 ]; then
 		select_log
@@ -39,25 +30,35 @@ function check_file(){
 		show_dialog
 		exit 1
 	fi
+
+	if [ ! -r $FILE ]; then
+	        zenity --error --title="Log Viewer Error" --text="You have not permission to read $FILE"
+                show_dialog
+                exit 1
+        fi
 }
 
 function select_log(){
 	case $LOG in
 		Auth.log)
 			check_file $AUTH
-			tail -250 "/var/log/auth.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+			tail -250 "$AUTH" |  zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
 		;;
 		Boot.log)
 			check_file $BOOT
-			tail -250 "/var/log/boot.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+			tail -250 "$BOOT" |  zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
 		;;
 		Syslog)
 			check_file $SYSLOG
-			tail -250 "/var/log/syslog" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+			tail -250 "$SYSLOG" |  zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
 		;;
 		Xorg.0.log)
 			check_file $XORG
-			tail -250 "/var/log/Xorg.0.log" |  zenity --text-info --title "$LOG" --width="1280" --height="1024"
+			tail -250 "$XORG" |  zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
+		;;
+		Sys_backup.log)
+			check_file $BACKUP
+			tail -250 "$BACKUP" |  zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
 		;;
 		*)
 			zenity --notification --text="Selection error!"
