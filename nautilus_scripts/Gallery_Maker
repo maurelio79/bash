@@ -1,0 +1,130 @@
+#!/bin/bash
+
+####################################################################
+#
+# Simple nautilus_script to quickly create a photo gallery.
+#
+# This script will 
+# - create a project directory in your home
+# - create inside project directory 2 directories: thumb and big
+# - copy photos inside big and thumb directories
+# - resize images in big and thumb directories 
+#
+# To run this script you need:
+# - zenity
+# - imagemagick
+#
+# Author: Mauro Lomartire
+# Script Name: Gallery_Maker
+# Script Version: 1.0 BETA
+# License: GPLv3 http://www.gnu.org/licenses/licenses.en.html
+#
+####################################################################
+
+WIDTH="640"
+HEIGHT="480"
+
+LOG="$HOME/gallery_maker.log"
+if [ -f $LOG ]; then
+	rm $LOG
+fi
+touch $LOG
+
+PROGRAM="mogrify"
+if [ ! `which $PROGRAM` ]; then
+	zenity --error --title="Gallery Maker" --text "$PROGRAM not found on your system.\nInstall it with\napt-get install imagemagick"
+	exit 1
+fi
+
+PHOTO="$PWD/$1"
+if [ ! -d $PHOTO ]; then
+	zenity --error --title="Gallery Maker" --text "No source directory find."
+	exit 1
+fi
+
+function get_data(){
+
+	PROJECT=`zenity --entry --title "Gallery Maker" --text="Insert project name"` 2>> $LOG || return 1
+	if [ ! $PROJECT ]; then
+		ERROR="Project directory not set!"
+		return 1
+		exit 1
+	fi
+
+	EXT=`zenity --list --title="Gallery Maker" --text="Choose source file format" --radiolist --column="Select" --column="File Type" FALSE jpg FALSE jpeg FALSE png`
+	if [ ! $EXT ]; then
+		ERROR="File type not set!"
+		return 1
+		exit 1
+	fi
+
+	SCALEBIG=`zenity --scale --title="Gallery Maker" --text="Choose % size for big photos" --min-value="0" --max-value="100"` 2>> $LOG || return 1
+	if [ $SCALEBIG -eq 0 ]; then
+		ERROR="Percentual scale could not be 0!"
+		return 1
+		exit 1
+	fi
+
+	SCALETHUMB=`zenity --scale --title="Gallery Maker" --text="Choose % size for thumbs photos" --min-value="0" --max-value="100"` 2>> $LOG || return 1
+	if [ $SCALETHUMB -eq 0 ]; then
+		ERROR="Percentual scale could not be 0!"
+		return 1
+		exit 1
+	fi
+
+}
+
+function prepare(){
+	mkdir -p "$HOME/$PROJECT/thumbs"  2>> $LOG || return 1
+	mkdir -p "$HOME/$PROJECT/big"  2>> $LOG || return 1
+
+	cp $PHOTO/*.$EXT $HOME/$PROJECT/thumbs  2>> $LOG || return 1
+	cp $PHOTO/*.$EXT $HOME/$PROJECT/big  2>> $LOG || return 1
+}
+
+function resize_thumb(){
+		cd $HOME/$PROJECT/thumbs
+		for i in `ls`; do
+			echo "Resizing $i..."
+			`mogrify -scale $SCALETHUMB% $i`
+		done | zenity --progress --title="Gallery Maker" --text="Resizing images in $HOME/$PROJECT/thumbs to $SCALETHUMB%..." --pulsate --auto-close
+
+}
+
+function resize_big(){
+	cd $HOME/$PROJECT/big
+	for i in `ls`; do
+		echo "Resizing $i..."
+		`mogrify -scale $SCALEBIG% $i`
+	done | zenity --progress --title="Gallery Maker" --text="Resizing images in $HOME/$PROJECT/big to $SCALEBIG%..." --pulsate --auto-close
+}
+
+if ! get_data; then
+	zenity --error --title="Gallery Maker" --text "Error during collecting data.\n$ERROR"
+	exit 1
+fi
+
+if ! prepare; then
+	zenity --error --title="Gallery Maker" --text "Error during prepare of directories structure."
+	cat "$LOG" | zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
+	exit 1
+fi
+
+if ! resize_thumb; then
+	zenity --error --title="Gallery Maker" --text "Error during resizing to $SCALETHUMB."
+	cat "$LOG" | zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
+	exit 1
+fi
+
+if ! resize_big; then
+	zenity --error --title="Gallery Maker" --text "Error during resizing to $SCALEBIG."
+	cat "$LOG" | zenity --text-info --title "$LOG" --width="$WIDTH" --height="$HEIGHT"
+	exit 1
+fi
+
+zenity --info --title="Gallery Maker - Well Done!" --text="Gallery created in $HOME/$PROJECT"
+
+
+
+
+
