@@ -24,24 +24,28 @@
 WIDTH="640"
 HEIGHT="480"
 
+# Set log file
 LOG="$HOME/gallery_maker.log"
 if [ -f $LOG ]; then
 	rm $LOG
 fi
 touch $LOG
 
+# Verify if mogrify is present on system
 PROGRAM="mogrify"
 if [ ! `which $PROGRAM` ]; then
 	zenity --error --title="Gallery Maker" --text "$PROGRAM not found on your system.\nInstall it with\napt-get install imagemagick"
 	exit 1
 fi
 
+# Set source photo directory 
 PHOTO="$PWD/$1"
 if [ ! -d $PHOTO ]; then
 	zenity --error --title="Gallery Maker" --text "No source directory find."
 	exit 1
 fi
 
+# Collect data needed by the script
 function get_data(){
 
 	PROJECT=`zenity --entry --title "Gallery Maker" --text="Insert project name"` 2>> $LOG || return 1
@@ -74,6 +78,7 @@ function get_data(){
 
 }
 
+# Create directory structure and copy source photos (in this way original photo WILL NOT modified)
 function prepare(){
 	mkdir -p "$HOME/$PROJECT/thumbs"  2>> $LOG || return 1
 	mkdir -p "$HOME/$PROJECT/big"  2>> $LOG || return 1
@@ -82,6 +87,7 @@ function prepare(){
 	cp $PHOTO/*.$EXT $HOME/$PROJECT/big  2>> $LOG || return 1
 }
 
+# Resize images in thumbs folder
 function resize_thumb(){
 		cd $HOME/$PROJECT/thumbs
 		for i in `ls`; do
@@ -91,6 +97,7 @@ function resize_thumb(){
 
 }
 
+# Resize images in big folder
 function resize_big(){
 	cd $HOME/$PROJECT/big
 	for i in `ls`; do
@@ -99,6 +106,7 @@ function resize_big(){
 	done | zenity --progress --title="Gallery Maker" --text="Resizing images in $HOME/$PROJECT/big to $SCALEBIG%..." --pulsate --auto-close
 }
 
+# Launching functions with error check
 if ! get_data; then
 	zenity --error --title="Gallery Maker" --text "Error during collecting data.\n$ERROR"
 	exit 1
