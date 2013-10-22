@@ -9,5 +9,6 @@ Enjoy!<br /><br />
 <b>Script List</b><br />
 - Log_Viewer -> A fast and simple way to access system log
 - Gallery_Maker -> Quick resize images to use in a gallery.
+- pyLog_Viewer -> Same as Log_Viewer but in pygtk, just an exercise ;-)
 See the wiki https://github.com/maurelio79/bash/wiki/Gallery_Maker
 
