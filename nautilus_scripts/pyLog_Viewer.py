@@ -1,5 +1,20 @@
 #!/usr/bin/env python
-   
+
+####################################################################
+#
+# Simple nautilus_script to quickly access system log.
+#
+# To run this script you need:
+# - python
+# - pygtk
+#
+# Author: Mauro Lomartire
+# Script Name: pyLog_Viewer
+# Script Version: 1.0 BETA
+# License: GPLv3 http://www.gnu.org/licenses/licenses.en.html
+#
+####################################################################
+
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -17,9 +32,6 @@ class LogViewer:
 			infile.close()
 			self.textbuffer.set_text(string)
 			self.window.set_title("pyLog_Viewer - %s" %data)
-		else:
-			string = ("Some errors occur during retrive of file %s" %data)
-			self.textbuffer.set_text(string)
 			
 	def reset_event(self, widget, data):
 		string = ("pyLog_Viewer\n\nThis python script allow user to quiclky access some system logs.\n\nThis script is released under GPLv3\n\nAuthor: Mauro Lomartire\nEmail: maurelio@bromptoniano.me")
